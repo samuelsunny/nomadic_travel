@@ -1460,81 +1460,81 @@ app.post("/book_flight_from_cart", (req, res) => {
 app.post("/book_flight", (req, res) => {
     if(req.session.user)
     {
-        console.log("Body:",req.body);
-        // var  flight_id =  req.body.flight_id;
-        // console.log("in bookings:",req.body.miles);
-        // var flight_details= { 
-        //      type         : req.body.type, 
-        //      userId  : req.session.user._id,
-        //      flight_id    :  req.body.flight_id,
-        //      flight_name :  req.body.flight_name,
-        //      flightnumber :  req.body.flightnumber,
-        //      departure_airport : req.body.departure_airport,
-        //      arrival_airport : req.body.arrival_airport,
-        //      departure_date : req.body.departure_date,
-        //      arrival_date : req.body.arrival_date,
-        //      departure_time : req.body.departure_time,
-        //      arrival_time : req.body.arrival_time,
-        //      passengers : req.body.passengers,
-        //      price : req.body.price,
-        //      miles : req.body.miles
-        //     };
-        //     var add_mileage = parseInt(req.body.miles);
-        //     console.log("miles:",flight_details);
+        // console.log("Body:",req.body);
+        var  flight_id =  req.body.flight_id;
+        console.log("in bookings:",req.body.miles);
+        var flight_details= { 
+             type         : req.body.type, 
+             userId  : req.session.user._id,
+             flight_id    :  req.body.flight_id,
+             flight_name :  req.body.flight_name,
+             flightnumber :  req.body.flightnumber,
+             departure_airport : req.body.departure_airport,
+             arrival_airport : req.body.arrival_airport,
+             departure_date : req.body.departure_date,
+             arrival_date : req.body.arrival_date,
+             departure_time : req.body.departure_time,
+             arrival_time : req.body.arrival_time,
+             passengers : req.body.passengers,
+             price : req.body.price,
+             miles : req.body.miles
+            };
+            var add_mileage = parseInt(req.body.miles);
+            console.log("miles:",flight_details);
        
-        //     var cart_item = {
-        //         userId      : req.session.user._id,
-        //         item_id     : flight_id,
-        //         details     : JSON.stringify(flight_details)
-        //     }
-        //     // console.log("booking:",cart_item);
-        //     var miles = 0;
-        //     Booking.find({details: JSON.stringify(flight_details), userId : req.session.user._id},function(err,results){
-        //         if(err)
-        //         {
-        //             console.log("Error part:",err);
-        //             res.status(500).send();
+            var cart_item = {
+                userId      : req.session.user._id,
+                item_id     : flight_id,
+                details     : JSON.stringify(flight_details)
+            }
+            // console.log("booking:",cart_item);
+            var miles = 0;
+            Booking.find({details: JSON.stringify(flight_details), userId : req.session.user._id},function(err,results){
+                if(err)
+                {
+                    console.log("Error part:",err);
+                    res.status(500).send();
         
-        //         }
+                }
 
-        //         if( results.length == 0)
-        //         {
-        //             var add_flights_to_bookings = new Booking(cart_item);
-        //             add_flights_to_bookings.save();
-        //             // Get user miles here
-        //             User.find({_id: req.session.user._id},async function(err,user){
-        //                 if(err)
-        //                 {
-        //                     console.log("Error part:",err);
-        //                     res.status(500).send();
+                if( results.length == 0)
+                {
+                    var add_flights_to_bookings = new Booking(cart_item);
+                    add_flights_to_bookings.save();
+                    // Get user miles here
+                    User.find({_id: req.session.user._id},async function(err,user){
+                        if(err)
+                        {
+                            console.log("Error part:",err);
+                            res.status(500).send();
                 
-        //                 }
+                        }
         
-        //                 if( user.length != 0)
-        //                 {
-        //                     miles = miles + user[0].mileage;
-        //                     console.log("  flight mileage:",miles,user[0].mileage);
-        //                 }
-        //                 var added_mileage = add_mileage + parseInt(miles);
-        //                 console.log("added miles:",added_mileage);
-        //                 var mileage = {mileage : String(added_mileage)}
-        //                 var updated_details = await User.findOneAndUpdate(
-        //                     { username: req.session.user.username },
-        //                     mileage,
-        //                     // If `new` isn't true, `findOneAndUpdate()` will return the
-        //                     // document as it was _before_ it was updated.
-        //                     { new: true }
-        //                   );
-        //                 console.log("just miles:",updated_details); 
-        //             await Cart.deleteOne({ details: JSON.stringify(flight_details)});
-        //             res.sendFile(__dirname + "/success_booking.html");
-        //         });
-            // }
-            //     else
-            //     {
-            //         res.sendFile(__dirname + "/flight_in_cart.html");  
-            //     }
-            //         });
+                        if( user.length != 0)
+                        {
+                            miles = miles + user[0].mileage;
+                            console.log("  flight mileage:",miles,user[0].mileage);
+                        }
+                        var added_mileage = add_mileage + parseInt(miles);
+                        console.log("added miles:",added_mileage);
+                        var mileage = {mileage : String(added_mileage)}
+                        var updated_details = await User.findOneAndUpdate(
+                            { username: req.session.user.username },
+                            mileage,
+                            // If `new` isn't true, `findOneAndUpdate()` will return the
+                            // document as it was _before_ it was updated.
+                            { new: true }
+                          );
+                        console.log("just miles:",updated_details); 
+                    await Cart.deleteOne({ details: JSON.stringify(flight_details)});
+                    res.sendFile(__dirname + "/success_booking.html");
+                });
+            }
+                else
+                {
+                    res.sendFile(__dirname + "/flight_in_cart.html");  
+                }
+                    });
                 
                 
     }
