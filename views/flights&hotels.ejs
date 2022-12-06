@@ -25,7 +25,7 @@
                 <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
                     <li class="nav-item ">
                         <a class="nav-link active text-light" aria-current="page" href="searchflights">
-                            <button type="button" class="btn btn-light">Flights</button>
+                            <button type="button" class="btn btn-primary">Flights</button>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -35,7 +35,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active text-light" aria-current="page" href="flights&hotels">
-                            <button type="button" class="btn btn-primary" onclick="setdouble()">Flights & Hotels</button>
+                            <button type="button" class="btn btn-light" onclick="setdouble()">Flights & Hotels</button>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -83,7 +83,7 @@
                                     <input class="form-control me-2" type="search" placeholder="Enter city name" aria-label="Destination city" id="destination_city" name="destination_city" required>
                                 </div>
                             </div>
-
+                            
                             <div class="col-11 mx-auto">
                                 <div class="row text-left p-2">
                                     <label for="user_name" class="form-label"><h4>From</h4></label>
@@ -99,7 +99,7 @@
                                     </div>
                                     <div class="col-5 m-2 mt-0">
                                         <label for="user_name" class="form-label"><h4>Round trip</h4></label>
-                                    <input class="form-control me-2" type="date" placeholder="Date of check-out" aria-label="Date of travel" id="return_date" name="return_date" onchange="getReturnDate()" required>
+                                    <input class="form-control me-2" type="date" placeholder="Date of check-out" aria-label="Date of travel" id="return_date" name="return_date" onchange="getReturnDate()" >
                                     </div>
                                     
                                 </div>
@@ -161,26 +161,22 @@
         }
         function getReturnDate()
         {
-            currentDate = new Date().toJSON().slice(0, 10);
-            check_in_date_field = document.getElementById("travel_date");
             check_out_date_field = document.getElementById("return_date");
+            check_out_date = document.getElementById("return_date").value;
+            check_in_date = document.getElementById("travel_date").value;
+            console.log("check_out date:",check_in_date);
 
-            check_in_date = check_in_date_field.value;
-            check_out_date = check_out_date_field.value;
             if(check_in_date>check_out_date)
             {
-                alert("Please select a proper date of return");
+                alert("Please select a proper date of check-out");
                 // Resetting the return date
                 reset_date_native(check_out_date_field)
             }
-            else if(currentDate > check_out_date)
+            else
             {
-                alert("Please select a proper date of return");
-                // Resetting the return date
-                reset_date_native(check_out_date_field)
-            }      
+                localStorage.setItem("check_out_date",check_out_date);
+            }
         }
-
         function getTravelDate()
         {
             currentDate = new Date().toJSON().slice(0, 10);
@@ -191,9 +187,9 @@
             check_out_date = check_out_date_field.value;
             if(check_out_date != '')
             {
-                if(check_in_date>check_out_date || check_in_date < currentDate)
+                if(check_in_date>check_out_date)
                 {
-                    alert("Please select a proper date of travel");
+                    alert("Please select a proper date for check-in");
                     // Resetting the return date
                     reset_date_native(check_in_date_field)
                 }
@@ -201,10 +197,16 @@
             }
             else if(currentDate > check_in_date)
             {
-                alert("Please select a proper date of travel");
+                alert("Please select a proper date for check-in");
                 // Resetting the return date
                 reset_date_native(check_in_date_field)
             }
+            else
+            {
+                localStorage.setItem("check_in_date",check_in_date);
+            }
+           
+            // check_in_date_field.innerHTML = 'None';
             console.log("check_in date:",check_in_date,"check_out date:",check_out_date,"current_date:",currentDate);
         }
 
@@ -223,6 +225,12 @@
         {
             selection = document.getElementById("selection");
             console.log("Seleted preference:",selection.options[selection.selectedIndex].text);
+        }
+        function setdouble()
+        {
+            console.log(1);
+            localStorage.clear();
+            localStorage.setItem("flights+hotels", 1);
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>

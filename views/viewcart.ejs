@@ -21,7 +21,7 @@
     <div class="container-fluid">
         <nav class="navbar bg-primary navbar-expand-lg text-light">
             <div class="container-fluid">
-                <a class="navbar-brand" href="homepage"><h4 class="text-light">Nomadic travel</h4></a>
+                <a class="navbar-brand" href="/"><h4 class="text-light">Nomadic travel</h4></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
                 </button>
@@ -35,6 +35,11 @@
                     <li class="nav-item">
                         <a class="nav-link active text-light" aria-current="page" href="searchhotels">
                             <button type="button" class="btn btn-primary">Hotels</button>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-light" aria-current="page" href="flights&hotels">
+                            <button type="button" class="btn btn-primary" onclick="setdouble()">Flights & Hotels</button>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -57,6 +62,7 @@
                     </button>
                     <ul class="dropdown-menu">
                       <li><a class="dropdown-item" href="editprofile">Edit profile</a></li>
+                      <li><a class="dropdown-item bg-primary text-white" href="editprofile"><b></b><%= user.mileage %> miles</b></a></li>
                       <li><a class="dropdown-item" href="logout">Log out</a></li>
                     </ul>
                   </div>
@@ -64,7 +70,7 @@
                 </div>
             </div>
         </nav>
-    </div>  
+    </div>   
     <div class="container text-center">
     <h3 class="mt-2">Cart items</h3>
     <div class="container-fluid justify-content-center mt-2 mb-5">
@@ -175,8 +181,8 @@
                                   
                               </div>
                               <div class="col-md-3 mt-1">
-                                <div class="row mb-1 p-4">
-                                    <h5 class="card-title mb-2" name="price">$<%= search_results[i].price %></h5>
+                                <div class="row mb-1">
+                                    <h5 class="card-title" name="price">$<%= search_results[i].price %></h5>
 
                                     <form method="post" action="book_room_from_cart">
                                         <input type="hidden" id="roomId" name="roomId" value = "<%= search_results[i].roomId %>"/>
@@ -196,7 +202,7 @@
         
         
                                             <input type="hidden" id="add_to_cart" value="abc"/>
-                                        <button type="submit" class="btn btn-primary m-0 mt-2">Book this!</button>
+                                        <button type="submit" class="btn btn-primary m-0 mt-2">Book!</button>
                                     </form>
                                     
                                 </div>
@@ -230,22 +236,30 @@
         <% } %>
     </div>
     </div>
-    <div class="container-fluid fixed-bottom justify-content-center">
+    <div class="container justify-content-center">
         <div class="row mt-2 justify-content-center mt-5">
             <div class="col-2 text-center bg-light p-2">
                 <form method="post" action="clear_cart">
                     <button type="submit" class="btn btn-danger p-2">Clear cart</button>
                 </form>
             </div>
-            <div class="col-2 text-center bg-light p-2">
-                <h4 class="p-0">Total cost &nbsp;&nbsp;&nbsp;: </h4>
+            <div class="col-4 text-center bg-light p-2">
+                <h4 class="p-0">Pay &nbsp;&nbsp;&nbsp;: $<%= total_cost %></h4>
             </div>
-            <div class="col-2 text-center bg-light p-2">
-                <h4 class="p-0">$<%= total_cost %></h4>
-            </div>
+            
             <div class="col-2 text-center bg-light p-2">
                 <form method="post" action="checkout_cart">
-                    <button type="submit" class="btn btn-primary p-2">Checkout</button>
+                    <div class="row ">
+                        
+                        <div class="col-3">
+                            <button type="submit" class="btn btn-primary p-2">Checkout</button>
+                            <div class="col-12">
+                                <input type="checkbox" id="redeem_miles" name="redeem_miles" value="1">
+                                <label for="redeem_miles"> Redeem miles</label>
+                            </div>
+                        </div>
+                        
+                    </div>
                 </form>
             </div>
         </div>

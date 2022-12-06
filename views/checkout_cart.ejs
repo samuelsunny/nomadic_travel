@@ -17,7 +17,7 @@
     <div class="container-fluid">
         <nav class="navbar bg-primary navbar-expand-lg text-light">
             <div class="container-fluid">
-                <a class="navbar-brand" href="homepage"><h4 class="text-light">Nomadic travel</h4></a>
+                <a class="navbar-brand" href="/"><h4 class="text-light">Nomadic travel</h4></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
                 </button>
@@ -31,6 +31,11 @@
                     <li class="nav-item">
                         <a class="nav-link active text-light" aria-current="page" href="searchhotels">
                             <button type="button" class="btn btn-primary">Hotels</button>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-light" aria-current="page" href="flights&hotels">
+                            <button type="button" class="btn btn-primary" onclick="setdouble()">Flights & Hotels</button>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -52,16 +57,16 @@
                         My account
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="editprofile">Edit profile</a></li>
-                        <li><a class="dropdown-item bg-primary text-white" href="editprofile"><b></b><%= user.mileage %> miles</b></a></li>
-                        <li><a class="dropdown-item" href="logout">Log out</a></li>
+                      <li><a class="dropdown-item" href="editprofile">Edit profile</a></li>
+                      <li><a class="dropdown-item bg-primary text-white" href="editprofile"><b></b><%= user.mileage %> miles</b></a></li>
+                      <li><a class="dropdown-item" href="logout">Log out</a></li>
                     </ul>
                   </div>
                 
                 </div>
             </div>
         </nav>
-    </div> 
+    </div>  
 
     <div class="container mt-1">
 
@@ -111,7 +116,7 @@
                                                                 <%= JSON.parse(booking_details)[i].flight_name %>
                                                             </div><div class="col-3">
                                                                 <%= JSON.parse(booking_details)[i].departure_date %>
-                                                            </div><div class="col-4">
+                                                            </div><div class="col-4" id="price">
                                                                 $<%= JSON.parse(booking_details)[i].price %>
                                                             </div>
                                                         </div>
