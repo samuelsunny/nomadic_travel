@@ -118,6 +118,7 @@
                                         <input type="hidden" id="arrival_time" name="arrival_time" value ="<%= search_results[i].arrival_time %>"/>
                                         <input type="hidden" id="passengers" name="passengers" value ="<%= search_results[i].passengers %>"/>
                                         <input type="hidden" id="price" name="price" value ="<%= search_results[i].price %>"/>
+                                        <input type="hidden" id="miles" name="miles" value ="<%= search_results[i].miles %>"/>
                                          
                                     <input type="hidden" id="add_to_cart" value="abc"/>
                                     <button type="submit" class="btn btn-primary mt-2 text-light">Book this!</button>
@@ -137,7 +138,8 @@
                                         <input type="hidden" id="departure_time" name="departure_time" value ="<%= search_results[i].departure_time %>"/>
                                         <input type="hidden" id="arrival_time" name="arrival_time" value ="<%= search_results[i].arrival_time %>"/>
                                         <input type="hidden" id="passengers" name="passengers" value ="<%= search_results[i].passengers %>"/>
-                                        <input type="hidden" id="price" name="price" value ="<%= search_results[i].price %>"/>                          
+                                        <input type="hidden" id="miles" name="miles" value ="<%= search_results[i].miles %>"/>
+                                        <input type="hidden" id="price" name="price" value ="<%= search_results[i].price %>"/>                               
         
                                             <input type="hidden" id="add_to_cart" name="cart_item" value ="<%= search_results[i] %>"/>
                                         <button type="submit" class="btn btn-danger m-0">Remove</button>
@@ -159,7 +161,6 @@
                               <div class="col-md-5">
                                 <h4>Hotel</h4>
                                 <h6 class="card-title" name="hotel_name"><%= search_results[i].hotel_name %></h6>
-                                <h4>Room</h4>
                                 <h6 class="card-title" name="hotel_name"><%= search_results[i].roomName %></h6>
                                 <p class="card-text p-0 m-0" name="city"><b></b> <%= search_results[i].city.charAt(0).toUpperCase() + search_results[i].city.slice(1) %></p>
                                 <p class="card-text p-0 mb-1" name="address"><b></b> <%= search_results[i].address %></p>
@@ -205,7 +206,7 @@
                                         <input type="hidden" id="hotelId" name="hotelId" value = "<%= search_results[i].hotelId %>"/>
                                         <input type="hidden" id="hotel_name" name="hotel_name" value = "<%= search_results[i].hotel_name %>"/>
                                         <input type="hidden" id="type" name="type" value = "<%= search_results[i].type %>"/>
-                                        <input type="hidden" id="roomName" name="roomName" value = "<%= search_results[i].name %>"/>
+                                        <input type="hidden" id="roomName" name="roomName" value = "<%= search_results[i].roomName %>"/>
     
                                         <input type="hidden" id="check_in_date" name="check_in_date" value = "<%= search_results[i].check_in_date %>"/>
                                         <input type="hidden" id="check_out_date" name="check_out_date" value = "<%= search_results[i].check_out_date %>"/>

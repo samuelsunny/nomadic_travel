@@ -52,8 +52,9 @@
                         My account
                     </button>
                     <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="editprofile">Edit profile</a></li>
-                      <li><a class="dropdown-item" href="logout">Log out</a></li>
+                        <li><a class="dropdown-item" href="editprofile">Edit profile</a></li>
+                        <li><a class="dropdown-item bg-primary text-white" href="editprofile"><b></b><%= user.mileage %> miles</b></a></li>
+                        <li><a class="dropdown-item" href="logout">Log out</a></li>
                     </ul>
                   </div>
                 
@@ -122,7 +123,7 @@
                                         </div>
                                         <div class="col-6">
                                             <label for="username" class="form-label">Price:</label>
-                                            <h4>$<%= booking_details.price %></h4>
+                                            <h4>$<%= parseInt(booking_details.people)*parseInt(booking_details.price) %></h4>
                                         </div>
                                         
                                     </div>     
@@ -186,7 +187,7 @@
                                     <input type="hidden" id="people" name="people" value ="<%= booking_details.people %>"/>
 
 
-                                    <button type="submit" class="btn btn-primary  mt-4" id="button" >Pay and book</button>
+                                    <button type="submit" class="btn btn-primary  mt-4" id="button" >Pay</button>
                                 </div>
                             </form>
                         </div>   

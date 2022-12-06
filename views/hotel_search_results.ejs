@@ -142,7 +142,7 @@
                   </div>
             </div>
             <div class="col-7 mt-4">
-                <div class="container justify-content-center mt-5">
+                <div class="container justify-content-center mt-2">
                     <% for(var i=0; i < search_results.length; i++) { %>
             
                     <div class="row mb-2 justify-content-center">
@@ -153,7 +153,6 @@
                                   <div class="col-md-5">
                                     <h4>Hotel</h4>
                                 <h6 class="card-title" name="hotel_name"><%= search_results[i].hotel_name %></h6>
-                                <h4>Room</h4>
                                 <h6 class="card-title" name="hotel_name"><%= search_results[i].name %></h6>
                                 <p class="card-text p-0 m-0" name="city"><b></b> <%= search_results[i].city.charAt(0).toUpperCase() + search_results[i].city.slice(1) %></p>
                                 <p class="card-text p-0 mb-1" name="address"><b></b> <%= search_results[i].hotel_address %></p>
@@ -164,7 +163,7 @@
                                       <p class="card-text p-0" name="amenities"><%= search_results[i].amenities %></p>
                                       <p class="card-text p-0 m-0" name="price">Price: $ <%= search_results[i].price %></p>
                                   </div>
-                                  <div class="col-md-3 mt-4">
+                                  <div class="col-md-3 ">
                                     <div class="row mb-1 p-4">
                                         <form method="post" action="book_room_from_cart">
                                                 <input type="hidden" id="roomId" name="roomId" value = "<%= search_results[i].roomId %>"/>

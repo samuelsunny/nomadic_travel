@@ -52,8 +52,9 @@
                         My account
                     </button>
                     <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="editprofile">Edit profile</a></li>
-                      <li><a class="dropdown-item" href="logout">Log out</a></li>
+                        <li><a class="dropdown-item" href="editprofile">Edit profile</a></li>
+                        <li><a class="dropdown-item bg-primary text-white" href="editprofile"><b></b><%= user.mileage %> miles</b></a></li>
+                        <li><a class="dropdown-item" href="logout">Log out</a></li>
                     </ul>
                   </div>
                 
@@ -66,7 +67,7 @@
 
         <div class="row justify-content-center">
             
-            <div class="col-8">
+            <div class="col-10">
                 <div class="card mt-1 p-2">
                     <div class="card-body">
                         <div class="row">
@@ -124,11 +125,19 @@
                                         </div>
                                         <%} %>
                                     </div>
+                                    <div class="row bg-light">
+                                        <div class="col-4 ">
+                                            <h2 value="<%= total_cost %>">Total cost: </h2>
+                                        </div>
+                                        <div class="col-4 ">
+                                            <h2 id="total">$<%= total_cost %></h2>
+                                        </div>
+                                    </div>
                                 </div>
                                                                       
                             </div>
                             <div class="col-12">
-                                <div class="card bg-primary paymentinfo">
+                                <div class="card bg-primary ">
                                     <div class="card-body">
                                         <div class="row text-left">
                                             <h4 class="text-white mb-4">Payment information</h4>
@@ -166,8 +175,9 @@
              
                         <div class="row text-center">
                             <form method="post" action="buy_cart">
+                                <input type="hidden" id="remaining_miles" name="remaining_miles" value = "<%= remaining_miles %>"/>
                                 <div id="sender">
-                                    <button type="submit" class="btn btn-primary  mt-4" id="button" >Pay</button>
+                                    <button type="submit" class="btn btn-primary  mt-4" id="button" onclick="resetter()">Pay</button>
                                 </div>
                             </form>
                         </div>   
@@ -180,6 +190,25 @@
         
     </div>
     <script>
+        document.getElementById("total").onload = function() {newprice()};
+        console.log(document.getElementById("price").innerHTML);
+        var value = parseInt(document.getElementById("total").innerHTML.split("$")[1]);
+        var combined_purchase = localStorage.getItem("flights+hotels");
+        if(combined_purchase == 1)
+        {
+            
+            var price = document.getElementById("total");
+            var value = parseInt(price.innerHTML.split("$")[1]);
+            var newprice = value - (value*0.2);
+            price.innerHTML = "$"+newprice;
+            
+            alert("20% OFF!."+"\n"+"\n"+
+                "Total cost before discount:"+" "+" "+"$"+value+"\n"+
+                "Total cost after 20% discount:"+" "+"$"+newprice+"\n"+"\n"
+                );
+            // localStorage.clear();
+
+        }
         var return_date = "";
         var travel_date = "";
         function reset_date_native() {
@@ -213,6 +242,10 @@
             travel_date = document.getElementById("travel_date").value;
             // travel_date_field.innerHTML = 'None';
             console.log("travel_date:",travel_date);
+        }
+        function resetter()
+        {
+            localStorage.clear();
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>

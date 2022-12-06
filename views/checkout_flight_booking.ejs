@@ -15,37 +15,49 @@
   </head>
   <body>
     <div class="container-fluid">
-        <nav class="navbar navbar-expand-lg bg-light">
+        <nav class="navbar bg-primary navbar-expand-lg text-light">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#"><h4>Travel & Stay</h4></a>
+                <a class="navbar-brand" href="homepage"><h4 class="text-light">Nomadic travel</h4></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarScroll">
                 <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="searchflights">Book flights</a>
+                    <li class="nav-item ">
+                        <a class="nav-link active text-light" aria-current="page" href="searchflights">
+                            <button type="button" class="btn btn-light">Flights</button>
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="searchhotels">Book hotels</a>
+                        <a class="nav-link active text-light" aria-current="page" href="searchhotels">
+                            <button type="button" class="btn btn-primary">Hotels</button>
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="viewcart">My cart</a>
+                        <a class="nav-link active text-light" aria-current="page" href="viewcart">
+                            <button type="button" class="btn btn-primary">Shopping cart</button>
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="mybookings">My bookings</a>
+                        <a class="nav-link active text-light" aria-current="page" href="mybookings">
+                            <button type="button" class="btn btn-primary">Purchases</button>
+
+                        </a>
                     </li>
                     
                     
                 </ul>
-                <span class="align-middle mr-2">
-                    <a class="nav-link active" href="editprofile">
-                        <h1 class="display-4 fs-5 text-center ">Welcome, <%= user.username %> &nbsp; </h1>
-                    </a>
-                </span>
-                    <a href="logout">
-                        <button class="btn btn-warning  ml-2" type="submit">Log out</button>
-                    </a>
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        My account
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="editprofile">Edit profile</a></li>
+                      <li><a class="dropdown-item bg-primary text-white" href="editprofile"><b></b><%= user.mileage %> miles</b></a></li>
+                      <li><a class="dropdown-item" href="logout">Log out</a></li>
+                    </ul>
+                  </div>
+                
                 </div>
             </div>
         </nav>
@@ -60,7 +72,7 @@
                     <div class="card-body">
                         <div class="row">
                             
-                            <div class="col-6">
+                            <div class="col-12">
                                 <div class="row text-left">
                                     <h4 class=" mb-2">Booking details</h4>
                                 </div>
@@ -124,15 +136,15 @@
                                         </div>
                                         <div class="col-6">
                                             <label for="username" class="form-label">Price</label>
-                                            <h4><%= booking_details.price %></h4>
+                                            <h4>$<%= parseInt(booking_details.passengers)*parseInt(booking_details.price) %></h4>
                                         </div>
                                     </div>     
                                 </div>
 
                                 
                             </div>
-                            <div class="col-6 ">
-                                <div class="card paymentinfo">
+                            <div class="col-12 ">
+                                <div class="card bg-primary">
                                     <div class="card-body">
                                         <div class="row text-left">
                                             <h4 class="text-white mb-4">Payment information</h4>
@@ -185,7 +197,7 @@
                                 <input type="hidden" id="passengers" name="passengers" value ="<%= booking_details.passengers %>"/>
                                 <input type="hidden" id="price" name="price" value ="<%= booking_details.price %>"/>
 
-                                    <button type="submit" class="btn btn-success  mt-4" id="button" >Pay and book</button>
+                                    <button type="submit" class="btn btn-success mt-2" id="button" >Pay</button>
                                 </div>
                             </form>
                         </div>   
