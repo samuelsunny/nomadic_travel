@@ -1,7 +1,7 @@
 var express = require("express");
 var session = require('express-session');
 var app = express();
-var port = 3000;
+var port = 4200;
 var bodyParser = require('body-parser');
 
 // set the view engine to ejs
@@ -25,6 +25,9 @@ app.use(express.static('views'));
 var mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
 mongoose.connect("mongodb://localhost:27017/travel_and_stay");
+// Schemas for documents to be stored in MongoDB
+
+// schema for user accounts
 var userSchema = new mongoose.Schema({
     account_type:String,
     username: String,
@@ -38,9 +41,11 @@ var userSchema = new mongoose.Schema({
     card_number : String,
     expiry_date: String,
     cvv    : String,
-    billing_address: String    
+    billing_address: String,    
+    mileage        : Number
 });
 
+// Schema for flights
 var flightSchema = new mongoose.Schema({
     flightnumber: String,
     flightname: String,
@@ -55,22 +60,12 @@ var flightSchema = new mongoose.Schema({
     business_seats: String,
     economy_seats : String,
     business_seat_price: String,
-    economy_seat_price : String
+    economy_seat_price : String,
+    miles              : String
 
 });
 
-var hotelSchema = new mongoose.Schema({
-    hotelname: String,
-    address: String,
-    city    : String,
-    country: String,
-    suits: String,
-    suit_price: String,
-    rooms : String,
-    room_price: String
-
-});
-
+// Schema for rooms( for both suites and rooms)
 var roomSchema = new mongoose.Schema({
     hotelId: String,
     hotel_name:String,
@@ -86,70 +81,21 @@ var roomSchema = new mongoose.Schema({
     available: String
 });
 
-var roomcartSchema = new mongoose.Schema({
-    userId          : String,
-    roomId          : String,
-    hotel_name      : String,
-    type            : String,    
-    amenities       : String,
-    city            : String,
-    check_in_date   : String,
-    check_out_date  : String,
-    type            : String,
-    price           : String
-});
-var bookings_rooms_Schema = new mongoose.Schema({
-    userId          : String,
-    roomId          : String,
-    hotel_name      : String,
-    type            : String,    
-    amenities       : String,
-    city            : String,
-    check_in_date   : String,
-    check_out_date  : String,
-    type            : String,
-    price           : String
-});
-
-
-var flightcartSchema = new mongoose.Schema({
-    userId          : String,
-    flightId          : String,
-    flight_name      : String,
-    flightnumber    : String,    
-    departure_airport       : String,
-    arrival_airport            : String,
-    departure_date   : String,
-    arrival_date  : String,
-    departure_time            : String,
-    arrival_time           : String
-});
-
-var bookings_flights_Schema = new mongoose.Schema({
-    userId          : String,
-    flightId          : String,
-    flight_name      : String,
-    flightnumber    : String,    
-    departure_airport       : String,
-    arrival_airport            : String,
-    departure_date   : String,
-    arrival_date  : String,
-    departure_time            : String,
-    arrival_time           : String
-});
-
+// Schema for shopping cart
 var cart_schema = new mongoose.Schema({
     userId      : String,
     item_id     : String,
     details     : String
 });
 
+// Schema for bookings
 var bookings_schema = new mongoose.Schema({
     userId      : String,
     item_id     : String,
     details     : String
 });
 
+// Schema for room reservations
 var roomReservationsSchema = new mongoose.Schema({
     hotelId: String,
     roomId : String,
@@ -166,17 +112,23 @@ var roomReservationsSchema = new mongoose.Schema({
     available: String
 });
 
+// Schema for feedback
+var feedbackSchema = new mongoose.Schema({
+    userId: String,
+    rating:String,
+    user_email : String,
+    feedback:String
+});
 
 
 var User = mongoose.model("Users", userSchema);
 var Flight = mongoose.model("Flights", flightSchema);
-var Hotel = mongoose.model("Hotels", hotelSchema);
 var Room = mongoose.model("Rooms",roomSchema);
-var RoomBookings =  mongoose.model("Rooms_bookings",bookings_rooms_Schema);
-var FlightBookings = mongoose.model("Flight_bookings",bookings_flights_Schema);
 var Cart = mongoose.model("user_cart",cart_schema);
 var Booking = mongoose.model("Bookings",bookings_schema);
 var roomReservation = mongoose.model("RoomReservations",roomReservationsSchema);
+var Feedback = mongoose.model("feedback",feedbackSchema);
+
 
 
 
@@ -189,51 +141,33 @@ app.post("/login", (req, res) => {
         {
             console.log("Error part:",err);
             res.status(500).send();
-
         }
-        console.log("After err");
+        // console.log("After err:",user,user._doc);
         // console.log(user._doc.username == username);
         if( user && user._doc.username == username)
         {
             if( user._doc.username == "admin")
             {
                 req.session.user = user;
-                // res.sendFile(__dirname + "/adminhomepage.html");
                 res.render('adminhomepage',{user: req.session.user});
-               
             }
             else if(user._doc.account_type == "hotel")
             {
                 req.session.user = user;
-                // console.log("Near ejs");
-                // var username = user._doc.username;
                 res.render('hotelmanagement',{user: req.session.user});
             }
             else
             {
-                console.log("Near ejs");
-
                 req.session.user = user;
-                // console.log("Near ejs");
-                // var username = user._doc.username;
                 res.render('homepage',{user: req.session.user});
-                console.log("Coming out ejs");
-                
-                // res.sendFile(__dirname + "/homepage.html");
-                
             }
-            // req.session.user = user;
-            
         }
         else{
             console.log("After ejs");
             res.sendFile(__dirname + "/login.html");
         }
-    //     req.session.user = user;
+        });   
     });
-
-    
-});
 
 app.get("/logout", (req, res) => {
     req.session.destroy();
@@ -273,8 +207,18 @@ app.get("/", (req, res) => {
         res.render('hotelmanagement',{user: req.session.user});
     }
     else{
-        res.render('homepage',{user: req.session.user});
-        // res.sendFile(__dirname + "/homepage.html");
+        User.findOne({username: req.session.user.username},function(err,user){
+            if(err)
+            {
+                console.log("Error part:",err);
+                res.status(500).send();
+            }
+            console.log("After err:",user,user._doc);
+            // console.log(user._doc.username == username);
+            req.session.user = user;
+            res.render('homepage',{user:user});
+        });
+            
     }
 });
 
@@ -290,7 +234,6 @@ app.get("/homepage", (req, res) => {
         }
         else{
             res.render('homepage',{user: req.session.user});
-            // res.sendFile(__dirname + "/homepage.html");
         }
     }
     else{
@@ -300,15 +243,11 @@ app.get("/homepage", (req, res) => {
 });
 
 app.get("/createuser", (req, res) => {
-    
     res.sendFile(__dirname + "/createaccount.html");
-  
 });
 
-app.get("/createhoteluser", (req, res) => {
-    
+app.get("/createhoteluser", (req, res) => { 
     res.sendFile(__dirname + "/createhotelaccount.html");
-  
 });
 
 app.get("/addflight", (req, res) => {
@@ -398,24 +337,22 @@ app.post("/addsuit", (req, res) => {
             .catch(err => {
                 res.status(400).send("Unable to save to room reservation");
             })
-
-        // res.sendFile(__dirname + "/addsuit.html");
         });
-    }
-    else{
-        res.sendFile(__dirname + "/login.html");
-    }
-});
+        }
+        else{
+            res.sendFile(__dirname + "/login.html");
+        }
+    });
 
 app.get("/addroom", (req, res) => {
-    if(req.session.user)
-    {
-        res.sendFile(__dirname + "/addroom.html");
-    }
-    else{
-        res.sendFile(__dirname + "/login.html");
-    }
-});
+        if(req.session.user)
+        {
+            res.sendFile(__dirname + "/addroom.html");
+        }
+        else{
+            res.sendFile(__dirname + "/login.html");
+        }
+    });
 
 app.post("/addroom", (req, res) => {
     if(req.session.user)
@@ -522,15 +459,14 @@ app.post("/adduser", (req, res) => {
             card_number : card_number,
             expiry_date : expiry_date,
             cvv         : cvv,
-            billing_address: billing_address
+            billing_address: billing_address,
+            mileage : 0
         }
         User.find({username: username},function(err,user){
             if(err)
             {
                 console.log("Error part:",err);
-                res.status(500).send();
-
-    
+                res.status(500).send();    
             }
             else{
                 if(user.length > 0)
@@ -603,20 +539,22 @@ app.post("/addflight", (req, res) => {
     {
         flight_details ={
             flightnumber : req.body.flightnumber,
-            flightname : req.body.flightnname,
+            flightname : req.body.flightname,
             departure_airport : req.body.departure_airport,
             arrival_airport : req.body.arrival_airport,
             departure_city : req.body.departure_city.toLowerCase(),
             arrival_city : req.body.arrival_city.toLowerCase(),
             departure_date : req.body.departure_date,
             arrival_date : req.body.arrival_date,
-            departure_time : req.body.departure_date,
-            arrival_time : req.body.arrival_date,
+            departure_time : req.body.departure_time,
+            arrival_time : req.body.arrival_time,
             business_seats : req.body.business_seats,
             economy_seats : req.body.economy_seats,
             business_seat_price : req.body.business_seat_price,
-            economy_seat_price : req.body.economy_seat_price
-        }
+            economy_seat_price : req.body.economy_seat_price,
+            miles              : String(req.body.miles)
+            }
+        console.log("flight details:", flight_details);
         var myData = new Flight(flight_details);
         myData.save()
             .then(item => {
@@ -631,73 +569,73 @@ app.post("/addflight", (req, res) => {
     }
 });
 
-app.post("/addhotel", (req, res) => {
-    if(req.session.user)
-    {
-        var city = req.body.city;
-        var city_name = city.toLowerCase(); 
-        var country = req.body.country;
-        var country_name = country.toLowerCase(); 
-        var myData = new Hotel(req.body);
-         myData.save()
-        .then(item => {
-            var hotel_name = req.body.hotelname;
-            Hotel.findOne({hotelname: hotel_name},function(err,hotel){
-                if(err)
-                {
-                    console.log("Error part:",err);
-                    res.status(500).send();
+// app.post("/addhotel", (req, res) => {
+//     if(req.session.user)
+//     {
+//         var city = req.body.city;
+//         var city_name = city.toLowerCase(); 
+//         var country = req.body.country;
+//         var country_name = country.toLowerCase(); 
+//         var myData = new Hotel(req.body);
+//          myData.save()
+//         .then(item => {
+//             var hotel_name = req.body.hotelname;
+//             Hotel.findOne({hotelname: hotel_name},function(err,hotel){
+//                 if(err)
+//                 {
+//                     console.log("Error part:",err);
+//                     res.status(500).send();
 
-                }
-                else{
-                    hotel_id = hotel._id;
-                    var suits = parseInt(req.body.suits);
-                        var rooms = parseInt(req.body.rooms);
-                        room_info={
-                            hotelId:hotel._id,
-                            city:city_name,
-                            country:country_name,
-                            booking_start_date: "",
-                            booking_end_date  : "",
-                            type:"suite",
-                            available: "Yes"    
+//                 }
+//                 else{
+//                     hotel_id = hotel._id;
+//                     var suits = parseInt(req.body.suits);
+//                         var rooms = parseInt(req.body.rooms);
+//                         room_info={
+//                             hotelId:hotel._id,
+//                             city:city_name,
+//                             country:country_name,
+//                             booking_start_date: "",
+//                             booking_end_date  : "",
+//                             type:"suite",
+//                             available: "Yes"    
 
-                        };
-                        for (let i = 1; i <= suits; i++) {
-                            var create_suits = new Room(room_info);
-                            create_suits.save();
-                        }
-                        room_info={
-                            hotelId: hotel_id,
-                            city:city_name,
-                            country:country_name,
-                            booking_start_date: "",
-                            booking_end_date  : "",
-                            type:"room",
-                            available: "Yes"    
+//                         };
+//                         for (let i = 1; i <= suits; i++) {
+//                             var create_suits = new Room(room_info);
+//                             create_suits.save();
+//                         }
+//                         room_info={
+//                             hotelId: hotel_id,
+//                             city:city_name,
+//                             country:country_name,
+//                             booking_start_date: "",
+//                             booking_end_date  : "",
+//                             type:"room",
+//                             available: "Yes"    
 
-                        };
-                        for (let i = 1; i <= rooms; i++) {
-                            var create_rooms = new Room(room_info);
-                            create_rooms.save();
-                        }
+//                         };
+//                         for (let i = 1; i <= rooms; i++) {
+//                             var create_rooms = new Room(room_info);
+//                             create_rooms.save();
+//                         }
                         
-                    }
+//                     }
                     
-                });
-                // console.log("After loop",1,2);
+//                 });
+//                 // console.log("After loop",1,2);
             
-                res.sendFile(__dirname + "/success_hotel.html");
-            })
-            .catch(err => {
-                console.log(err);
-                res.status(400).send("Unable to save to database");
-            });
-    }
-    else{
-        res.sendFile(__dirname + "/login.html");
-    }   
-});
+//                 res.sendFile(__dirname + "/success_hotel.html");
+//             })
+//             .catch(err => {
+//                 console.log(err);
+//                 res.status(400).send("Unable to save to database");
+//             });
+//     }
+//     else{
+//         res.sendFile(__dirname + "/login.html");
+//     }   
+// });
 
 app.get("/searchhotels", (req, res) => {
     if(req.session.user)
@@ -819,44 +757,85 @@ app.post("/searchflights", (req, res) => {
     {
         if(return_date != "")
         {
-            Flight.find({departure_date: travel_date, arrival_date:return_date,departure_city:String(departure_city_name),
-                arrival_city:String(destination_city_name)},function(err,results){
+            var to_flights = [];
+            var from_flights = [];
+            Flight.find({departure_date: travel_date, departure_city:String(departure_city_name),arrival_city:String(destination_city_name)},function(err,to_trip){
                 if(err)
                 {
                     console.log("Error part:",err);
                     res.status(500).send();
         
                 }
-                console.log("Ready:",results.length);
-                var rooms = [];
-                for (let i = 0; i < results.length; i++) {
-                    rooms[i] = results[i]._doc;
+                else
+                {
+                    // console.log("To flights:",to_trip);
+                    for (let i = 0; i < to_trip.length; i++) {
+                        // console.log("to dest:",to_trip[i]._doc);
+                        to_flights[i] = to_trip[i]._doc
+                    }
+                    
                 }
+                Flight.find({departure_city:String(destination_city_name),departure_date:return_date,arrival_city:String(departure_city_name)},function(err,from_trip){
+                    if(err)
+                    {
+                        console.log("Error part:",err);
+                        res.status(500).send();
+            
+                    }
+                    else
+                    {
+                        // console.log("From flights:",from_trip);
+                        for (let i = 0; i < from_trip.length; i++) {
+                            from_flights[i] = from_trip[i]._doc;
+                        }
+                        console.log("From:",from_flights);
+                        console.log("To:",to_flights);
+                        if(to_flights.length == 0 && from_flights.length == 0)
+                        {
+                            res.render('no_flights_found',{user: req.session.user});
+                        }
+                        else
+                        {
+                            res.render('round_Trip_results',{user: req.session.user,flights_to_destination: to_trip,
+                                flights_from_destination: from_trip,departure_city:departure_city_name,
+                                destination_city:destination_city_name,travel_date:travel_date,
+                                return_date:return_date,people:people,preference:selection                                   
+                            }); 
+                        }
+                    }
+                });
+            });
+            
+            
+
+                // console.log("Ready:",to_trip.length);
+                // var to_flights = [];
+                // for (let i = 0; i < to_trip.length; i++) {
+                //     to_flights[i] = to_trip[i]._doc;
+                // }
                 // console.log("Rooms:",rooms);
 
 
-                if( results.length == 0)
-                {
-                    res.render('no_flights_found',{user: req.session.user});
-                }
-                    // req.session.user = user;
-                else{
-                    res.render('flight_search_results',{user: req.session.user,search_results: results,departure_city:departure_city_name,
-                        destination_city:destination_city_name,travel_date:travel_date,return_date:return_date,
-                                                        people:people,preference:selection
-
-                                                    });
-                }   
+                // if( results.length == 0)
+                // {
+                //     res.render('no_flights_found',{user: req.session.user});
                 // }
+                //     // req.session.user = user;
+              
+                // res.render('flight_search_results',{user: req.session.user,flights_to_destination: to_flights,
+                //     flights_from_destination: from_flights,departure_city:departure_city_name,
+                //     destination_city:destination_city_name,travel_date:travel_date,
+                //     return_date:return_date,people:people,preference:selection                                   
+                // });   
                 // else{
                 //     console.log("After ejs");
                 //     res.sendFile(__dirname + "/login.html");
                 // }
             //     req.session.user = user;
-            });
+            }
             // res.render('searchhotels',{user: req.session.user});
             // res.sendFile(__dirname + "/homepage.html");
-        }
+
         else
         {
             console.log("Inside flights");
@@ -897,12 +876,11 @@ app.post("/searchflights", (req, res) => {
                 // res.render('searchhotels',{user: req.session.user});
                 // res.sendFile(__dirname + "/homepage.html");
         }
-        
-    }
-    else{
-        res.sendFile(__dirname + "/login.html");
-    }
-});
+    }    
+        else{
+            res.sendFile(__dirname + "/login.html");
+        }
+    });
 
 app.get("/editprofile", (req, res) => {
     if(req.session.user)
@@ -1097,6 +1075,8 @@ app.post("/add_flight_to_cart", (req, res) => {
         var departure_time = req.body.departure_time;
         var passengers = req.body.passengers;
         var price = req.body.price;
+        var miles = req.body.miles;
+
 
         var arrival_time = req.body.arrival_time;
         
@@ -1113,7 +1093,8 @@ app.post("/add_flight_to_cart", (req, res) => {
             departure_time   : departure_time,
             arrival_time     : arrival_time,
             passengers       : passengers,
-            price            : price
+            price            : price,
+            miles            : miles
         }
 
         var cart_item = {
@@ -1390,6 +1371,8 @@ app.post("/book_flight_now", (req, res) => {
         var arrival_time = req.body.arrival_time;
         var passengers = req.body.passengers;
         var price = req.body.price;
+        var miles = req.body.miles;
+
 
         Flight.findById({_id: String(flight_id)},function(err,room){
             if(err)
@@ -1415,8 +1398,10 @@ app.post("/book_flight_now", (req, res) => {
                     departure_time : departure_time,
                     arrival_time : arrival_time,
                     passengers: passengers,
-                    price: price
+                    price: price,
+                    miles: miles
                 }
+                console.log("miles details:",details);
                 res.render('checkout_flight_booking',{user: req.session.user,booking_details: details});
             }
         });
@@ -1443,6 +1428,8 @@ app.post("/book_flight_from_cart", (req, res) => {
         var arrival_time = req.body.arrival_time;
         var passengers = req.body.passengers;
         var price = req.body.price;
+        var miles = req.body.miles;
+
 
         var details = {
             type :  type,
@@ -1457,7 +1444,8 @@ app.post("/book_flight_from_cart", (req, res) => {
             departure_time : departure_time,
             arrival_time : arrival_time,
             passengers: passengers,
-            price: price
+            price: price,
+            miles: miles
         }
         res.render('checkout_flight_booking',{user: req.session.user,booking_details: details});
     }
@@ -1472,52 +1460,85 @@ app.post("/book_flight_from_cart", (req, res) => {
 app.post("/book_flight", (req, res) => {
     if(req.session.user)
     {
-        var  flight_id =  req.body.flight_id;
-        console.log("in bookings:");
-        var flight_details= { 
-             type         : req.body.type, 
-             userId  : req.session.user._id,
-             flight_id    :  req.body.flight_id,
-             flight_name :  req.body.flight_name,
-             flightnumber :  req.body.flightnumber,
-             departure_airport : req.body.departure_airport,
-             arrival_airport : req.body.arrival_airport,
-             departure_date : req.body.departure_date,
-             arrival_date : req.body.arrival_date,
-             departure_time : req.body.departure_time,
-             arrival_time : req.body.arrival_time,
-             passengers : req.body.passengers,
-             price : req.body.price,
-            };
+        console.log("Body:",req.body);
+        // var  flight_id =  req.body.flight_id;
+        // console.log("in bookings:",req.body.miles);
+        // var flight_details= { 
+        //      type         : req.body.type, 
+        //      userId  : req.session.user._id,
+        //      flight_id    :  req.body.flight_id,
+        //      flight_name :  req.body.flight_name,
+        //      flightnumber :  req.body.flightnumber,
+        //      departure_airport : req.body.departure_airport,
+        //      arrival_airport : req.body.arrival_airport,
+        //      departure_date : req.body.departure_date,
+        //      arrival_date : req.body.arrival_date,
+        //      departure_time : req.body.departure_time,
+        //      arrival_time : req.body.arrival_time,
+        //      passengers : req.body.passengers,
+        //      price : req.body.price,
+        //      miles : req.body.miles
+        //     };
+        //     var add_mileage = parseInt(req.body.miles);
+        //     console.log("miles:",flight_details);
        
-            var cart_item = {
-                userId      : req.session.user._id,
-                item_id     : flight_id,
-                details     : JSON.stringify(flight_details)
-            }
-            console.log("booking:",cart_item);
-            Booking.find({details: JSON.stringify(flight_details), userId : req.session.user._id},function(err,results){
-                if(err)
-                {
-                    console.log("Error part:",err);
-                    res.status(500).send();
+        //     var cart_item = {
+        //         userId      : req.session.user._id,
+        //         item_id     : flight_id,
+        //         details     : JSON.stringify(flight_details)
+        //     }
+        //     // console.log("booking:",cart_item);
+        //     var miles = 0;
+        //     Booking.find({details: JSON.stringify(flight_details), userId : req.session.user._id},function(err,results){
+        //         if(err)
+        //         {
+        //             console.log("Error part:",err);
+        //             res.status(500).send();
         
-                }
+        //         }
 
-                if( results.length == 0)
-                {
-                    var add_flights_to_bookings = new Booking(cart_item);
-                    add_flights_to_bookings.save();
-                    res.sendFile(__dirname + "/success_booking.html");
-                }
-                else
-                {
-                    res.sendFile(__dirname + "/flight_in_cart.html");  
-                }
-                    });
+        //         if( results.length == 0)
+        //         {
+        //             var add_flights_to_bookings = new Booking(cart_item);
+        //             add_flights_to_bookings.save();
+        //             // Get user miles here
+        //             User.find({_id: req.session.user._id},async function(err,user){
+        //                 if(err)
+        //                 {
+        //                     console.log("Error part:",err);
+        //                     res.status(500).send();
+                
+        //                 }
+        
+        //                 if( user.length != 0)
+        //                 {
+        //                     miles = miles + user[0].mileage;
+        //                     console.log("  flight mileage:",miles,user[0].mileage);
+        //                 }
+        //                 var added_mileage = add_mileage + parseInt(miles);
+        //                 console.log("added miles:",added_mileage);
+        //                 var mileage = {mileage : String(added_mileage)}
+        //                 var updated_details = await User.findOneAndUpdate(
+        //                     { username: req.session.user.username },
+        //                     mileage,
+        //                     // If `new` isn't true, `findOneAndUpdate()` will return the
+        //                     // document as it was _before_ it was updated.
+        //                     { new: true }
+        //                   );
+        //                 console.log("just miles:",updated_details); 
+        //             await Cart.deleteOne({ details: JSON.stringify(flight_details)});
+        //             res.sendFile(__dirname + "/success_booking.html");
+        //         });
+            // }
+            //     else
+            //     {
+            //         res.sendFile(__dirname + "/flight_in_cart.html");  
+            //     }
+            //         });
+                
                 
     }
-       
+        
     else{
         res.sendFile(__dirname + "/login.html");
     }
@@ -1543,7 +1564,13 @@ app.get("/viewcart", (req, res) => {
                         for (let i = 0; i < results.length; i++) {
                             cart_items[i] = JSON.parse(results[i]._doc.details);
                             cart_item_details = JSON.parse(results[i]._doc.details);
-                            total_cost += parseInt(cart_item_details.price);
+                            if(cart_items[i].type == "flight_ticket")
+                            {
+                                total_cost += parseInt(cart_item_details.price)*parseInt(cart_item_details.passengers);
+                            }
+                            else{
+                                total_cost += parseInt(cart_item_details.price);
+                            }
                         }
                         // console.log("Rooms:",rooms);
                         console.log("Total items:",cart_items)
@@ -1598,6 +1625,7 @@ app.post("/deletecartitem", (req, res) => {
         var arrival_date = req.body.arrival_date;
         var departure_time = req.body.departure_time;
         var passengers = req.body.passengers;
+        var miles      = req.body.miles;
         var price = req.body.price;
 
         var arrival_time = req.body.arrival_time;
@@ -1615,7 +1643,8 @@ app.post("/deletecartitem", (req, res) => {
             departure_time : departure_time,
             arrival_time : arrival_time,
             passengers: passengers,
-            price: price
+            price: price,
+            miles:miles
         }
         console.log("Inside cart del:",JSON.stringify(details));
         // var cart_item =  req.body.cart_item;
@@ -1684,7 +1713,7 @@ app.post("/deletecartitem", (req, res) => {
 
 
 app.post("/deleteroomcartitem", (req, res) => {
-
+    console.log("Session:",req.session);
     if(req.session.user && req.session.user.account_type == 'individual')
     {
         var roomId =  req.body.roomId;
@@ -2099,6 +2128,18 @@ app.post("/buy_cart", async (req, res) => {
 
     if(req.session.user && req.session.user.account_type == 'individual')
     {
+        var remaining_miles = parseInt(req.body.remaining_miles);
+        if(remaining_miles >= 1)
+        {
+            var mileage = {mileage : String(remaining_miles)};
+            var updated_details = await User.findOneAndUpdate(
+                { username: req.session.user.username },
+                mileage,
+                // If `new` isn't true, `findOneAndUpdate()` will return the
+                // document as it was _before_ it was updated.
+                { new: true }
+            );
+        }
         Cart.find({userId: req.session.user._id},function(err,results){
             if(err)
             {
@@ -2117,9 +2158,10 @@ app.post("/buy_cart", async (req, res) => {
                 }
                 // console.log("Rooms:",rooms);
                 console.log("Total checkout items:",cart_items)
-
+                var checker = 0;
+                var miles = 0;
                 for (let j = 0; j < cart_items.length; j++) {
-                    if(cart_items[j].type != "flight")
+                    if(cart_items[j].type != "flight_ticket")
                     {
                         check_in_date = cart_items[j].check_in_date;
                         check_out_date = cart_items[j].check_out_date;
@@ -2158,10 +2200,91 @@ app.post("/buy_cart", async (req, res) => {
                                 res.sendFile(__dirname + "/success_booking.html");
             
                             }
+                            else
+                            {
+                                checker = checker+ 1;
+                            }
                         });
-
                     }
+                    else
+                    {
+                        
+                        console.log("Inside buy_tickets_checkout");
+                        var flight_miles = parseInt(cart_items[j].miles);
+                        console.log("flight_miles:",flight_miles);
+
+                        var flight_id = cart_items[j].flight_id;
+                        console.log("Inside buy_tickets_checkout:",flight_miles,flight_id);
+
+                        Booking.find({details: JSON.stringify(cart_items[j]), userId : req.session.user._id},function(err,results){
+                            if(err)
+                            {
+                                console.log("Error part:",err);
+                                res.status(500).send();
+                    
+                            }
+                            var cart_item = {
+                                userId      : req.session.user._id,
+                                item_id     : flight_id,
+                                details     : JSON.stringify(cart_items[j])
+                            }
+                            if( results.length == 0)
+                            {
+                                console.log("Booking not present: Safe");
+                                var add_flights_to_bookings = new Booking(cart_item);
+                                add_flights_to_bookings.save();
+                                // Get user miles here
+                                User.find({_id: req.session.user._id},async function(err,user){
+                                    if(err)
+                                    {
+                                        console.log("Error part:",err);
+                                        res.status(500).send();
+                            
+                                    }
+                    
+                                    if( user.length != 0)
+                                    {
+                                        miles =  miles + user[0].mileage;
+                                        console.log("  flight mileage:",miles,user[0]);
+                                    }
+                                    var added_mileage = flight_miles + parseInt(miles);
+                                    console.log("flights miles:",flight_miles);
+
+                                    console.log("added miles:",added_mileage);
+                                    var mileage = {mileage : String(added_mileage)}
+                                    var updated_details = await User.findOneAndUpdate(
+                                        { username: req.session.user.username },
+                                        mileage,
+                                        // If `new` isn't true, `findOneAndUpdate()` will return the
+                                        // document as it was _before_ it was updated.
+                                        { new: true }
+                                      );
+                                    console.log("just miles:",updated_details);
+                                    await Cart.deleteOne({ details: JSON.stringify(cart_items[j])}); 
+                                    res.sendFile(__dirname + "/success_booking.html");
+                                    });
+                            }
+                            else{
+                                console.log("Booking present: Not Safe");
+                                checker = checker+ 1;
+                            }
+
+                            if(checker > 0)
+                            {
+                                res.sendFile(__dirname + "/flight_in_cart.html");  
+                            }   
+
+                                });
+                                // checker = checker+ 1;
+                            if(checker > 0)
+                            {
+                                res.sendFile(__dirname + "/flight_in_cart.html");  
+                            }        
+                    }
+                    
                 }
+                
+
             }
             });
 
@@ -2183,7 +2306,29 @@ app.post("/checkout_cart", async (req, res) => {
 
     if(req.session.user && req.session.user.account_type == 'individual')
     {
-        Cart.find({userId: req.session.user._id},function(err,results){
+        var redeem_miles = parseInt(req.body.redeem_miles);
+        var user_miles = 0;
+        var remaining_miles = 0;
+        if(redeem_miles == 1)
+        {
+            // Get user miles
+            User.find({_id: req.session.user._id},async function(err,user){
+                if(err)
+                {
+                    console.log("Error part:",err);
+                    res.status(500).send();
+        
+                }
+
+                if( user.length != 0)
+                {
+                    user_miles = user[0].mileage;
+                    console.log("  flight mileage:",user_miles,user[0].mileage);
+                }
+            });
+        }
+
+        Cart.find({userId: req.session.user._id}, async function(err,results){
             if(err)
             {
                 console.log("Error part:",err);
@@ -2197,10 +2342,22 @@ app.post("/checkout_cart", async (req, res) => {
                 for (let i = 0; i < results.length; i++) {
                     cart_items[i] = JSON.parse(results[i]._doc.details);
                     cart_item_details = JSON.parse(results[i]._doc.details);
-                    total_cost += parseInt(cart_item_details.price);
+                    if(cart_items[i].type == "flight_ticket")
+                    {
+                        total_cost += parseInt(cart_item_details.price)*parseInt(cart_item_details.passengers);
+                    }
+                    else{
+                        total_cost += parseInt(cart_item_details.price);
+                    }
+                }
+                if(user_miles >= 500)
+                {
+                    discount = (user_miles/500)*(5/100)*total_cost;
+                    total_cost = total_cost - discount;
+                    remaining_miles = user_miles%500;
                 }
                 console.log("acrt:",cart_items);
-                res.render('checkout_cart',{user: req.session.user,booking_details: JSON.stringify(cart_items)});
+                res.render('checkout_cart',{user: req.session.user,booking_details: JSON.stringify(cart_items),total_cost:total_cost,remaining_miles:remaining_miles});
 
 
             }
@@ -2236,6 +2393,7 @@ app.post("/cancel_flight_booking", async (req, res) => {
         var departure_time = req.body.departure_time;
         var arrival_time = req.body.arrival_time;
         var passengers = req.body.passengers;
+        var miles = req.body.miles;
         var price = req.body.price;
         
         var details = {
@@ -2251,14 +2409,41 @@ app.post("/cancel_flight_booking", async (req, res) => {
             departure_time : departure_time,
             arrival_time : arrival_time,
             passengers: passengers,
-            price: price
+            price: price,
+            miles: miles
         }
 
         console.log("details cancel:",JSON.stringify(details));
         var updated_details = await Booking.deleteOne(
             { details: JSON.stringify(details), userId:req.session.user._id },
           );
-        await Cart.deleteOne({ details: JSON.stringify(details),userId : req.session.user._id});
+          User.find({_id: req.session.user._id},async function(err,user){
+            if(err)
+            {
+                console.log("Error part:",err);
+                res.status(500).send();
+    
+            }
+
+            if( user.length != 0)
+            {
+                var user_miles = user[0].mileage;
+                // console.log("  flight mileage:",user_miles,user[0].mileage);
+            }
+            var subtracted_mileage = parseInt(user_miles) - miles ;
+            console.log("subtracted miles:",subtracted_mileage);
+            var mileage = {mileage : String(subtracted_mileage)}
+            var updated_details = await User.findOneAndUpdate(
+                { username: req.session.user.username },
+                mileage,
+                // If `new` isn't true, `findOneAndUpdate()` will return the
+                // document as it was _before_ it was updated.
+                { new: true }
+              );
+            console.log("just miles:",updated_details); 
+            await Cart.deleteOne({ details: JSON.stringify(details),userId : req.session.user._id});
+        });
+        // await Cart.deleteOne({ details: JSON.stringify(details),userId : req.session.user._id});
 
           Booking.find({userId: req.session.user._id},function(err,results){
             if(err)
@@ -2302,6 +2487,168 @@ app.post("/cancel_flight_booking", async (req, res) => {
     }
 });
 
+
+
+app.post("/round_trip_cart", (req, res) => {
+    if(req.session.user)
+    {
+        var to_flight = req.body.to_flight;
+        var return_flight = req.body.from_flight;
+        var passengers = req.body.passengers;
+        var preference = req.body.preference;
+        var to_miles = req.body.to_miles;
+        var from_miles = req.body.from_miles;
+
+        var price = 0;
+        
+
+        to_ticket = JSON.parse(to_flight);
+        return_ticket = JSON.parse(return_flight);
+        if(parseInt(preference) == 1)
+        {
+            to_ticket_price = to_ticket.business_seat_price;
+        }
+        else{
+            to_ticket_price = to_ticket.economy_seat_price; 
+        }
+
+        if(parseInt(preference) == 2)
+        {
+            return_ticket_price = return_ticket.business_seat_price;
+        }
+        else{
+            return_ticket_price = return_ticket.economy_seat_price; 
+        }
+        console.log("round trip:", to_ticket,return_ticket,passengers);
+        
+        var to_flight_details = {
+            type         : "flight_ticket",
+            userId       : req.session.user._id,
+            flight_id    : to_ticket._id,
+            flight_name  : to_ticket.flightname,
+            flightnumber        : to_ticket.flightnumber,
+            departure_airport   : to_ticket.departure_airport,
+            arrival_airport        : to_ticket.arrival_airport,
+            departure_date  : to_ticket.departure_date,
+            arrival_date : to_ticket.arrival_date,
+            departure_time   : to_ticket.departure_time,
+            arrival_time     : to_ticket.arrival_time,
+            passengers       : passengers,
+            price            : to_ticket_price,
+            miles            : to_miles
+        }
+
+        var return_flight_details = {
+            type         : "flight_ticket",
+            userId       : req.session.user._id,
+            flight_id    : return_ticket._id,
+            flight_name  : return_ticket.flightname,
+            flightnumber        : return_ticket.flightnumber,
+            departure_airport   : return_ticket.departure_airport,
+            arrival_airport        : return_ticket.arrival_airport,
+            departure_date  : return_ticket.departure_date,
+            arrival_date : return_ticket.arrival_date,
+            departure_time   : return_ticket.departure_time,
+            arrival_time     : return_ticket.arrival_time,
+            passengers       : passengers,
+            price            : return_ticket_price,
+            miles            : from_miles
+        }
+
+        var to_ticket_cart_item = {
+            userId      : req.session.user._id,
+            item_id     : to_ticket._id,
+            details     : JSON.stringify(to_flight_details)
+        }
+
+        var return_ticket_cart_item = {
+            userId      : req.session.user._id,
+            item_id     : return_ticket._id,
+            details     : JSON.stringify(return_flight_details)
+        }
+        // // console.log("cart_item_flight:",cart_item);
+            Cart.find({details: {$in:[JSON.stringify(to_flight_details),JSON.stringify(return_flight_details)]}, userId : req.session.user._id},function(err,results){
+                if(err)
+                {
+                    console.log("Error part:",err);
+                    res.status(500).send();
+        
+                }
+
+                if( results.length == 0)
+                {
+                    var add_to_ticket_to_cart = new Cart(to_ticket_cart_item);
+                    add_to_ticket_to_cart.save();
+                    var add_return_ticket_to_cart = new Cart(return_ticket_cart_item);
+                    add_return_ticket_to_cart.save();
+                        res.sendFile(__dirname + "/success_cart.html");
+
+                }
+                else{
+                    
+                            res.sendFile(__dirname + "/flight_in_cart.html");
+                       
+                    }
+                    // console.log(" cart:",results[0]._doc.details == JSON.stringify(flight_details));
+                
+                });
+                
+            // res.render('searchhotels',{user: req.session.user});
+            // res.sendFile(__dirname + "/homepage.html");
+    
+    }
+        
+    else{
+        res.sendFile(__dirname + "/login.html");
+    }
+
+});
+
+app.get("/feedback", (req, res) => {
+    if(req.session.user)
+    {
+        res.sendFile(__dirname + "/feedback.html");
+    }
+    else{
+        res.sendFile(__dirname + "/login.html");
+    }
+});
+
+app.post("/feedback", async (req, res) => {
+    if(req.session.user)
+    {
+        var rating = req.body.rate;
+        var user_email = req.body.email;
+        var feedback = req.body.feedback;
+        
+        var feedback_details ={
+            userId          : req.session.user._id,
+            rating          : rating,
+            user_email      : user_email,
+            feedback        : feedback
+        }
+        var updated_details = await Feedback.findOneAndUpdate(
+        { userId: req.session.user._id },
+        feedback_details,
+        // If `new` isn't true, `findOneAndUpdate()` will return the
+        // document as it was _before_ it was updated.
+        { new: true }
+        );
+        console.log("update details feedback:",updated_details);
+        if(updated_details == null)
+        {
+            var myfeedback = new Feedback(feedback_details);
+            myfeedback.save()
+            .then(item => {
+                res.sendFile(__dirname + "/success_submitted.html");
+            })
+        }
+        res.sendFile(__dirname + "/success_submitted.html");
+
+
+    }
+});
+
 app.get("*", (req, res) => {
     console.log("User:", req.session,req.session.user);
     if(!req.session.user)
@@ -2321,9 +2668,6 @@ app.get("*", (req, res) => {
         // res.sendFile(__dirname + "/homepage.html");
     }
 });
-
-
-
 app.listen(port, () => {
     console.log("Server listening on port " + port);
 });
