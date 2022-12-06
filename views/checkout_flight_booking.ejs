@@ -188,19 +188,20 @@
                         <div class="row text-center">
                             <form method="post" action="book_flight">
                                 <div id="sender">
-                                <input type="hidden" id="type" name="type" value = "flight_ticket"/>
-                                <input type="hidden" id="flight_id" name="flight_id" value = "<%= booking_details.flight_id %>"/>
-                                <input type="hidden" id="flight_name" name="flight_name" value = "<%= booking_details.flight_name %>"/>
-                                <input type="hidden" id="flightnumber" name="flightnumber" value = "<%= booking_details.flightnumber %>"/>
-                                <input type="hidden" id="departure_airport" name="departure_airport" value = "<%= booking_details.departure_airport %>"/>
-
-                                <input type="hidden" id="arrival_airport" name="arrival_airport" value = "<%= booking_details.arrival_airport %>"/>
-                                <input type="hidden" id="departure_date" name="departure_date" value = "<%= booking_details.departure_date %>"/>
-                                <input type="hidden" id="arrival_date" name="arrival_date" value ="<%= booking_details.arrival_date %>"/>
-                                <input type="hidden" id="departure_time" name="departure_time" value ="<%= booking_details.departure_time %>"/>
-                                <input type="hidden" id="arrival_time" name="arrival_time" value ="<%= booking_details.arrival_time %>"/>
-                                <input type="hidden" id="passengers" name="passengers" value ="<%= booking_details.passengers %>"/>
-                                <input type="hidden" id="price" name="price" value ="<%= booking_details.price %>"/>
+                                    <input type="hidden" id="type" name="type" value = "flight_ticket"/>
+                                    <input type="hidden" id="flight_id" name="flight_id" value = "<%= booking_details.flight_id %>"/>
+                                    <input type="hidden" id="flight_name" name="flight_name" value = "<%= booking_details.flight_name %>"/>
+                                    <input type="hidden" id="flightnumber" name="flightnumber" value = "<%= booking_details.flightnumber %>"/>
+                                    <input type="hidden" id="departure_airport" name="departure_airport" value = "<%= booking_details.departure_airport %>"/>
+    
+                                    <input type="hidden" id="arrival_airport" name="arrival_airport" value = "<%= booking_details.arrival_airport %>"/>
+                                    <input type="hidden" id="departure_date" name="departure_date" value = "<%= booking_details.departure_date %>"/>
+                                    <input type="hidden" id="arrival_date" name="arrival_date" value ="<%= booking_details.arrival_date %>"/>
+                                    <input type="hidden" id="departure_time" name="departure_time" value ="<%= booking_details.departure_time %>"/>
+                                    <input type="hidden" id="arrival_time" name="arrival_time" value ="<%= booking_details.arrival_time %>"/>
+                                    <input type="hidden" id="passengers" name="passengers" value ="<%= booking_details.passengers %>"/>
+                                    <input type="hidden" id="miles" name="miles" value ="<%= booking_details.miles %>"/>
+                                    <input type="hidden" id="price" name="price" value ="<%= booking_details.price %>"/>
 
                                     <button type="submit" class="btn btn-success mt-2" id="button" >Pay</button>
                                 </div>
