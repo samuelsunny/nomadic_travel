@@ -1609,6 +1609,31 @@ app.get("/viewcart", (req, res) => {
     }
 });
 
+app.get("/flights&hotels", (req, res) => {
+
+
+    if(req.session.user && req.session.user.account_type == 'individual')
+    {
+        res.render('flights&hotels',{user: req.session.user,});
+        // res.sendFile(__dirname + "/homepage.html");
+    }
+    else if(req.session.user && req.session.user.account_type == 'admin')
+    {
+
+        res.render('admin',{user: req.session.user});
+        // res.sendFile(__dirname + "/homepage.html");
+    }
+    else if(req.session.user && req.session.user.account_type == 'hotel')
+    {
+
+        res.render('hotelmanagement',{user: req.session.user});
+        // res.sendFile(__dirname + "/homepage.html");
+    }
+    else{
+        res.sendFile(__dirname + "/login.html");
+    }
+});
+
 
 app.post("/deletecartitem", (req, res) => {
 
@@ -2356,7 +2381,7 @@ app.post("/checkout_cart", async (req, res) => {
                     total_cost = total_cost - discount;
                     remaining_miles = user_miles%500;
                 }
-                console.log("acrt:",cart_items);
+                console.log("acrt:",cart_items,total_cost,remaining_miles);
                 res.render('checkout_cart',{user: req.session.user,booking_details: JSON.stringify(cart_items),total_cost:total_cost,remaining_miles:remaining_miles});
 
 
